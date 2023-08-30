@@ -30,10 +30,51 @@ You will need to clone the Diffusers git repository to finetune and use the mode
 !accelerate config default
 ```
 
+To use the model to generate the images, just copy the code below and change it to your liking, or you can just follow the notebooks.
+```
+from huggingface_hub import model_info
+
+# LoRA weights ~3 MB
+model_path = "Christabelle/sd_anime_concept_generator"
+
+info = model_info(model_path)
+model_base = info.cardData["base_model"]
+print(model_base)
+```
+
+```
+import torch
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler, UniPCMultistepScheduler
+
+pipe = StableDiffusionPipeline.from_pretrained(model_base, torch_dtype=torch.float16)
+#pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+#pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+```
+You can use either scheduler, UniPCMultistepScheduler is a lot faster as it is the most recent one at the time of writing this file.
+
+```
+from PIL import Image
+
+pipe.unet.load_attn_procs(model_path)
+pipe.to("cuda")
+
+# Code adapted from:
+# https://www.reddit.com/r/StableDiffusion/comments/wxba44/comment/ilqa7an/?utm_source=share&utm_medium=web2x&context=3
+pipe.safety_checker = lambda images, **kwargs: (images, [False] * len(images))
+
+prompt = "a man in a hunter outfit, white hair, dark skin, tan skin, red eyes, punk motif"
+image = pipe(prompt, negative_prompt="monochrome,low res,poorly drawn face, mutated body parts, deformed body features, bad anatomy, worst quality, low quality",num_inference_steps=250).images[0]
+image.save("magician.png")
+image.show()
+```
+
 ## Example Output
 Here are some examples of the character designs you can produce with the concept art generator.
 
-![image info](images/image.png)
-![image info](images/image.png)
-![image info](images/image.png)
-![image info](images/image.png)
+![a girl with long purple hair, ponytail, dark skin, star motif, punk motif](https://github.com/TC-Elulade/Concept_art_Generator_UAL_Thesis/blob/main/Sample%20pictures/star%20punk%2C%20dark%20skin.png)
+![a man in a hunter outfit, white hair, red eyes, dark skin, punk motif!](https://github.com/TC-Elulade/Concept_art_Generator_UAL_Thesis/blob/main/Sample%20pictures/hunter%20dark%20skin.png)
+![a girl with blue hair, long hair, holding sword, flower motif](https://github.com/TC-Elulade/Concept_art_Generator_UAL_Thesis/blob/main/Sample%20pictures/blue-sword-1.png)
+
+The generator is also capable of generating multiple images from one prompt.
+![a man or woman in a military uniform, mint hair, blue hair, moon motif](https://github.com/TC-Elulade/Concept_art_Generator_UAL_Thesis/blob/main/Sample%20pictures/moon%20miltary%20officers.png)
+
