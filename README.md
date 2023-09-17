@@ -1,6 +1,8 @@
 # Concept Art Generator (UAL Thesis)
 This repository contains notebooks for using the concept art generator and a tutorial for those who would like to finetune their own stable diffusion model. Stable diffusion is the best method for text-to-image generation, so I chose this method for generative concept art as it allows the user to have more control.
 
+If you would like to learn about the thesis project itself (motivation, background research and result evaluation), you can watch the video presentation [here](https://youtu.be/t5nQ_T2tKzA).
+
 ## Important Links
 If you would like to use the code to try out the generator on your computer or would like to follow the finetuning tutorial, please take note that a good portion of this project was done with a Huggingface account. Also, look through the following links for resources that could help you:
 
